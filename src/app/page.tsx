@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { BidInfo } from '@/types';
-import { loadBids, saveBids } from '@/lib/storage';
+import { loadBids, upsertBid, deleteBid as dbDeleteBid } from '@/lib/storage';
 import { parsePDF } from '@/lib/pdfExtract';
 import UploadZone from '@/components/UploadZone';
 import BidCard from '@/components/BidCard';
@@ -21,9 +21,10 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loaded = loadBids();
-    setBids(loaded);
-    if (loaded.length > 0) setSelectedId(loaded[0].id);
+    loadBids().then((loaded) => {
+      setBids(loaded);
+      if (loaded.length > 0) setSelectedId(loaded[0].id);
+    });
   }, []);
 
   const handleFiles = useCallback(async (files: File[]) => {
@@ -35,16 +36,13 @@ export default function Home() {
           const data = await parsePDF(file);
           return {
             ...data,
-            id: `bid-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            id: crypto.randomUUID(),
             uploadedAt: new Date().toISOString(),
           } satisfies BidInfo;
         })
       );
-      setBids((prev) => {
-        const next = [...prev, ...parsed];
-        saveBids(next);
-        return next;
-      });
+      setBids((prev) => [...prev, ...parsed]);
+      await Promise.all(parsed.map(upsertBid));
       if (parsed.length > 0) setSelectedId(parsed[0].id);
     } catch (e) {
       console.error(e);
@@ -55,21 +53,18 @@ export default function Home() {
   }, []);
 
   const updateBid = useCallback((updated: BidInfo) => {
-    setBids((prev) => {
-      const next = prev.map((b) => (b.id === updated.id ? updated : b));
-      saveBids(next);
-      return next;
-    });
+    setBids((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
+    void upsertBid(updated);
   }, []);
 
   const deleteBid = useCallback(
     (id: string) => {
       setBids((prev) => {
         const next = prev.filter((b) => b.id !== id);
-        saveBids(next);
         if (selectedId === id) setSelectedId(next[0]?.id ?? null);
         return next;
       });
+      void dbDeleteBid(id);
     },
     [selectedId]
   );

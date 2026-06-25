@@ -2,9 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import type { ProjectRecord, CareerRecord } from '@/types';
-import { loadCareers, loadProjects, saveCareers, saveProjects } from '@/lib/storage';
+import {
+  loadCareers, loadProjects,
+  upsertCareer, upsertProject,
+  deleteCareer as dbDeleteCareer,
+  deleteProject as dbDeleteProject,
+} from '@/lib/storage';
 
-const uid = () => `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+const uid = () => crypto.randomUUID();
 
 const emptyProject = (): ProjectRecord => ({
   id: uid(), 용역명: '', 발주처: '', 계약금액: '', 수행기간: '', 주요내용: '',
@@ -22,19 +27,24 @@ export default function ResumeForm({ bidName }: Props) {
   const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
-    const p = loadProjects();
-    const c = loadCareers();
-    setProjects(p.length ? p : [emptyProject()]);
-    setCareers(c.length ? c : [emptyCareer()]);
+    Promise.all([loadProjects(), loadCareers()]).then(([p, c]) => {
+      setProjects(p.length ? p : [emptyProject()]);
+      setCareers(c.length ? c : [emptyCareer()]);
+    });
   }, []);
 
   const updateProj = (id: string, field: keyof ProjectRecord, val: string) => {
-    const next = projects.map((p) => (p.id === id ? { ...p, [field]: val } : p));
-    setProjects(next); saveProjects(next);
+    const updated = projects.map((p) => (p.id === id ? { ...p, [field]: val } : p));
+    setProjects(updated);
+    const record = updated.find((p) => p.id === id);
+    if (record) void upsertProject(record);
   };
+
   const updateCareer = (id: string, field: keyof CareerRecord, val: string) => {
-    const next = careers.map((c) => (c.id === id ? { ...c, [field]: val } : c));
-    setCareers(next); saveCareers(next);
+    const updated = careers.map((c) => (c.id === id ? { ...c, [field]: val } : c));
+    setCareers(updated);
+    const record = updated.find((c) => c.id === id);
+    if (record) void upsertCareer(record);
   };
 
   const doExport = async () => {
@@ -73,7 +83,10 @@ export default function ResumeForm({ bidName }: Props) {
                 <span className="text-xs font-medium text-gray-600">실적 {idx + 1}</span>
                 {projects.length > 1 && (
                   <button
-                    onClick={() => { const n = projects.filter((x) => x.id !== p.id); setProjects(n); saveProjects(n); }}
+                    onClick={() => {
+                      setProjects((prev) => prev.filter((x) => x.id !== p.id));
+                      void dbDeleteProject(p.id);
+                    }}
                     className="text-gray-300 hover:text-red-400 text-sm"
                   >×</button>
                 )}
@@ -102,7 +115,11 @@ export default function ResumeForm({ bidName }: Props) {
             </div>
           ))}
           <button
-            onClick={() => { const n = [...projects, emptyProject()]; setProjects(n); saveProjects(n); }}
+            onClick={() => {
+              const newProj = emptyProject();
+              setProjects((prev) => [...prev, newProj]);
+              void upsertProject(newProj);
+            }}
             className="w-full rounded-lg border border-dashed border-gray-300 py-2 text-xs text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors"
           >
             + 실적 추가
@@ -118,7 +135,10 @@ export default function ResumeForm({ bidName }: Props) {
                 <span className="text-xs font-medium text-gray-600">기술자 {idx + 1}</span>
                 {careers.length > 1 && (
                   <button
-                    onClick={() => { const n = careers.filter((x) => x.id !== c.id); setCareers(n); saveCareers(n); }}
+                    onClick={() => {
+                      setCareers((prev) => prev.filter((x) => x.id !== c.id));
+                      void dbDeleteCareer(c.id);
+                    }}
                     className="text-gray-300 hover:text-red-400 text-sm"
                   >×</button>
                 )}
@@ -147,7 +167,11 @@ export default function ResumeForm({ bidName }: Props) {
             </div>
           ))}
           <button
-            onClick={() => { const n = [...careers, emptyCareer()]; setCareers(n); saveCareers(n); }}
+            onClick={() => {
+              const newCareer = emptyCareer();
+              setCareers((prev) => [...prev, newCareer]);
+              void upsertCareer(newCareer);
+            }}
             className="w-full rounded-lg border border-dashed border-gray-300 py-2 text-xs text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors"
           >
             + 기술자 추가

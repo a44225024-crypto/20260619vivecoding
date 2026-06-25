@@ -1,28 +1,68 @@
-import type { BidInfo, ProjectRecord, CareerRecord } from '@/types';
+import { createClient } from '@/lib/supabase/client'
+import type { BidInfo, ProjectRecord, CareerRecord } from '@/types'
 
-const KEYS = {
-  bids: 'bid-analyzer-bids',
-  projects: 'bid-analyzer-projects',
-  careers: 'bid-analyzer-careers',
-};
+// ── Bids ─────────────────────────────────────────────────────────────────────
 
-function load<T>(key: string): T[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    return JSON.parse(localStorage.getItem(key) || '[]');
-  } catch {
-    return [];
-  }
+export async function loadBids(): Promise<BidInfo[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('bids')
+    .select('*')
+    .order('uploadedAt', { ascending: false })
+  if (error) { console.error(error); return [] }
+  return (data ?? []) as BidInfo[]
 }
 
-function save<T>(key: string, data: T[]) {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(key, JSON.stringify(data));
+export async function upsertBid(bid: BidInfo): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase.from('bids').upsert(bid)
+  if (error) console.error(error)
 }
 
-export const loadBids = () => load<BidInfo>(KEYS.bids);
-export const saveBids = (d: BidInfo[]) => save(KEYS.bids, d);
-export const loadProjects = () => load<ProjectRecord>(KEYS.projects);
-export const saveProjects = (d: ProjectRecord[]) => save(KEYS.projects, d);
-export const loadCareers = () => load<CareerRecord>(KEYS.careers);
-export const saveCareers = (d: CareerRecord[]) => save(KEYS.careers, d);
+export async function deleteBid(id: string): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase.from('bids').delete().eq('id', id)
+  if (error) console.error(error)
+}
+
+// ── Projects ──────────────────────────────────────────────────────────────────
+
+export async function loadProjects(): Promise<ProjectRecord[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase.from('projects').select('*')
+  if (error) { console.error(error); return [] }
+  return (data ?? []) as ProjectRecord[]
+}
+
+export async function upsertProject(project: ProjectRecord): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase.from('projects').upsert(project)
+  if (error) console.error(error)
+}
+
+export async function deleteProject(id: string): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase.from('projects').delete().eq('id', id)
+  if (error) console.error(error)
+}
+
+// ── Careers ───────────────────────────────────────────────────────────────────
+
+export async function loadCareers(): Promise<CareerRecord[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase.from('careers').select('*')
+  if (error) { console.error(error); return [] }
+  return (data ?? []) as CareerRecord[]
+}
+
+export async function upsertCareer(career: CareerRecord): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase.from('careers').upsert(career)
+  if (error) console.error(error)
+}
+
+export async function deleteCareer(id: string): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase.from('careers').delete().eq('id', id)
+  if (error) console.error(error)
+}
