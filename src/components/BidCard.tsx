@@ -41,6 +41,51 @@ export default function BidCard({ bid, onUpdate, onDelete }: Props) {
   const [tab, setTab] = useState<Tab>('info');
   const [editKey, setEditKey] = useState<string | null>(null);
   const [editVal, setEditVal] = useState('');
+  const [ntceNoInput, setNtceNoInput] = useState(bid.bidNtceNo ?? '');
+  const [enriching, setEnriching] = useState(false);
+  const [enrichError, setEnrichError] = useState<string | null>(null);
+
+  const enrich = async () => {
+    const bidNtceNo = ntceNoInput.trim();
+    if (!bidNtceNo) return;
+    setEnriching(true);
+    setEnrichError(null);
+    try {
+      const kind = bid.공고구분 === '공사' ? 'cnstwk' : 'servc';
+      const res = await fetch(`/api/nara/enrich?kind=${kind}&bidNtceNo=${encodeURIComponent(bidNtceNo)}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || '보강 실패');
+
+      const { detail, bsisAmount } = json as {
+        detail: Record<string, string>;
+        bsisAmount: Record<string, string> | null;
+      };
+
+      const 참가자격Parts = [
+        detail.bidMethdNm && `입찰방식: ${detail.bidMethdNm}`,
+        detail.cntrctCnclsMthdNm && `계약체결방법: ${detail.cntrctCnclsMthdNm}`,
+        detail.intrbidYn === 'Y' && '국제입찰대상',
+        detail.bidQlfctRgstDt && `입찰참가자격등록마감: ${detail.bidQlfctRgstDt}`,
+      ].filter(Boolean);
+
+      onUpdate({
+        ...bid,
+        공고명: bid.공고명 || detail.bidNtceNm || '',
+        발주기관: bid.발주기관 || detail.ntceInsttNm || detail.dminsttNm || '',
+        마감일: bid.마감일 || (detail.bidClseDt ?? '').slice(0, 10),
+        예정금액:
+          bid.예정금액 ||
+          (bsisAmount?.bssamt ? `${Number(bsisAmount.bssamt).toLocaleString()}원 (기초금액)` : ''),
+        참가자격: bid.참가자격 || 참가자격Parts.join(' / '),
+        bidNtceNo,
+        bidNtceOrd: detail.bidNtceOrd ?? bid.bidNtceOrd,
+      });
+    } catch (e) {
+      setEnrichError(e instanceof Error ? e.message : '보강 실패');
+    } finally {
+      setEnriching(false);
+    }
+  };
 
   const dday = useMemo(() => calcDday(bid.마감일), [bid.마감일]);
   const progress = useMemo(() => {
@@ -173,6 +218,26 @@ export default function BidCard({ bid, onUpdate, onDelete }: Props) {
                 </dd>
               </div>
             ))}
+
+            <div className="mt-4 rounded-lg border border-purple-100 bg-purple-50/50 p-3">
+              <p className="mb-2 text-xs font-medium text-purple-700">나라장터 API로 보강</p>
+              <div className="flex gap-1.5">
+                <input
+                  value={ntceNoInput}
+                  onChange={(e) => setNtceNoInput(e.target.value)}
+                  placeholder="입찰공고번호 (예: R25BK00934017)"
+                  className="flex-1 rounded border border-purple-200 bg-white px-2 py-1 text-xs outline-none focus:border-purple-400"
+                />
+                <button
+                  onClick={enrich}
+                  disabled={enriching || !ntceNoInput.trim()}
+                  className="shrink-0 rounded bg-purple-500 px-2.5 py-1 text-xs font-semibold text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {enriching ? '조회 중…' : '보강'}
+                </button>
+              </div>
+              {enrichError && <p className="mt-1.5 text-[11px] text-red-600">{enrichError}</p>}
+            </div>
           </dl>
         )}
 

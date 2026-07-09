@@ -24,8 +24,8 @@ interface Props {
   onDelete: (id: string) => void;
   onUpload: (files: File[]) => void;
   loading: boolean;
-  view: 'dashboard' | 'compare';
-  onViewChange: (v: 'dashboard' | 'compare') => void;
+  view: 'dashboard' | 'compare' | 'search';
+  onViewChange: (v: 'dashboard' | 'compare' | 'search') => void;
 }
 
 export default function Sidebar({
@@ -69,6 +69,17 @@ export default function Sidebar({
             }}
           />
         </label>
+
+        <button
+          onClick={() => onViewChange('search')}
+          className={`mt-1.5 flex w-full items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition-colors ${
+            view === 'search'
+              ? 'bg-purple-500 text-white'
+              : 'bg-purple-800 text-purple-200 hover:bg-purple-700'
+          }`}
+        >
+          🔍 나라장터 검색
+        </button>
       </div>
 
       {/* Bid list */}

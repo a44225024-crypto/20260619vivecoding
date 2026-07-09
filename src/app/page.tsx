@@ -11,8 +11,9 @@ import Sidebar from '@/components/Sidebar';
 import KpiCards from '@/components/KpiCards';
 import DashboardCharts from '@/components/DashboardCharts';
 import LogoutButton from '@/components/LogoutButton';
+import NaraSearchPanel from '@/components/NaraSearchPanel';
 
-type View = 'dashboard' | 'compare';
+type View = 'dashboard' | 'compare' | 'search';
 
 export default function Home() {
   const [bids, setBids] = useState<BidInfo[]>([]);
@@ -53,6 +54,13 @@ export default function Home() {
     }
   }, []);
 
+  const addBidFromNara = useCallback(async (bid: BidInfo) => {
+    setBids((prev) => [bid, ...prev]);
+    setSelectedId(bid.id);
+    setView('dashboard');
+    await upsertBid(bid);
+  }, []);
+
   const updateBid = useCallback((updated: BidInfo) => {
     setBids((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
     void upsertBid(updated);
@@ -73,7 +81,9 @@ export default function Home() {
   const selectedBid = bids.find((b) => b.id === selectedId) ?? null;
 
   const headerTitle =
-    view === 'compare'
+    view === 'search'
+      ? '나라장터 검색'
+      : view === 'compare'
       ? '공고 비교'
       : selectedBid
       ? selectedBid.공고명 || '(공고명 미추출)'
@@ -122,7 +132,9 @@ export default function Home() {
 
         {/* Scrollable main */}
         <main className="flex-1 overflow-y-auto p-6">
-          {bids.length === 0 ? (
+          {view === 'search' ? (
+            <NaraSearchPanel onAdd={addBidFromNara} />
+          ) : bids.length === 0 ? (
             <UploadZone onFiles={handleFiles} loading={loading} />
           ) : view === 'compare' && bids.length > 1 ? (
             <CompareView bids={bids} onUpdate={updateBid} />

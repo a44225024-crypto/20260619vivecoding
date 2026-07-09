@@ -17,6 +17,9 @@ export interface BidInfo {
   참가자격: string;
   checklist: ChecklistItem[];
   uploadedAt: string;
+  bidNtceNo?: string;
+  bidNtceOrd?: string;
+  공고구분?: string;
 }
 
 export interface ProjectRecord {
