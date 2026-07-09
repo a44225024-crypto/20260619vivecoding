@@ -10,6 +10,7 @@ import CompareView from '@/components/CompareView';
 import Sidebar from '@/components/Sidebar';
 import KpiCards from '@/components/KpiCards';
 import DashboardCharts from '@/components/DashboardCharts';
+import LogoutButton from '@/components/LogoutButton';
 
 type View = 'dashboard' | 'compare';
 
@@ -108,11 +109,14 @@ export default function Home() {
                 })}
               </p>
             </div>
-            {error && (
-              <div className="ml-4 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs text-red-700">
-                {error}
-              </div>
-            )}
+            <div className="flex items-center gap-3">
+              {error && (
+                <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs text-red-700">
+                  {error}
+                </div>
+              )}
+              <LogoutButton />
+            </div>
           </div>
         </header>
 
