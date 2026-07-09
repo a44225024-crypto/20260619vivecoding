@@ -76,8 +76,10 @@ function LoginForm() {
                 type="email"
                 name="email"
                 required
+                pattern=".+@seon\.co\.kr"
+                title="@seon.co.kr 이메일만 사용할 수 있습니다"
                 className="w-full rounded-lg border border-purple-200 px-3 py-2 text-sm outline-none focus:border-purple-400"
-                placeholder="you@example.com"
+                placeholder="you@seon.co.kr"
               />
             </div>
             <div>
@@ -115,8 +117,10 @@ function LoginForm() {
                 type="email"
                 name="email"
                 required
+                pattern=".+@seon\.co\.kr"
+                title="@seon.co.kr 이메일만 사용할 수 있습니다"
                 className="w-full rounded-lg border border-purple-200 px-3 py-2 text-sm outline-none focus:border-purple-400"
-                placeholder="you@example.com"
+                placeholder="you@seon.co.kr"
               />
             </div>
             <button
