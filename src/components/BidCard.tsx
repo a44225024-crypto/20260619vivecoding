@@ -4,8 +4,9 @@ import { useMemo, useState } from 'react';
 import type { BidInfo } from '@/types';
 import Checklist from './Checklist';
 import ResumeForm from './ResumeForm';
+import AISummaryCard from './AISummaryCard';
 
-type Tab = 'info' | 'checklist' | 'resume';
+type Tab = 'info' | 'checklist' | 'resume' | 'summary';
 
 const FIELDS = [
   { key: '공고명' as const, label: '공고명' },
@@ -164,6 +165,7 @@ export default function BidCard({ bid, onUpdate, onDelete }: Props) {
             ['info', '기본정보'],
             ['checklist', '체크리스트'],
             ['resume', '실적·경력'],
+            ['summary', 'AI 요약'],
           ] as [Tab, string][]
         ).map(([key, label]) => (
           <button
@@ -249,6 +251,8 @@ export default function BidCard({ bid, onUpdate, onDelete }: Props) {
         )}
 
         {tab === 'resume' && <ResumeForm bidName={bid.공고명} />}
+
+        {tab === 'summary' && <AISummaryCard bid={bid} />}
       </div>
     </div>
   );
