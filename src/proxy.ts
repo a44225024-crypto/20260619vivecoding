@@ -2,6 +2,11 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function proxy(request: NextRequest) {
+  // 로컬 개발 중에는 매번 로그인하는 번거로움을 없애기 위해 인증 검사를 건너뜀
+  if (process.env.NODE_ENV !== 'production') {
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(

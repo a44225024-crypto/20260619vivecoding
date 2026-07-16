@@ -3,9 +3,11 @@ import { createClient } from '@/lib/supabase/server';
 import { getBidDetail, getBsisAmount, type BidKind } from '@/lib/nara';
 
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
+  if (process.env.NODE_ENV === 'production') {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
+  }
 
   const { searchParams } = new URL(request.url);
   const kind = (searchParams.get('kind') ?? 'servc') as BidKind;
