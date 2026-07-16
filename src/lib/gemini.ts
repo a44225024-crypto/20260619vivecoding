@@ -1,7 +1,7 @@
 // Google Gemini API 서버 전용 클라이언트
 // 절대 클라이언트 컴포넌트에서 import하지 말 것 — API 키가 노출됨
 
-const MODEL = process.env.GEMINI_MODEL || 'gemini-flash-3.1';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite';
 const BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 export type GeminiErrorCode = 'NOT_CONFIGURED' | 'RATE_LIMIT' | 'CALL_FAILED';
