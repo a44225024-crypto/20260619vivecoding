@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import type { BidInfo, ChecklistItem } from '@/types';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 
 type Kind = 'servc' | 'cnstwk';
 
@@ -92,7 +94,7 @@ export default function NaraSearchPanel({ onAdd }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <Card className="p-4">
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex rounded-lg bg-purple-50 p-1 text-xs font-semibold">
             <button
@@ -114,33 +116,36 @@ export default function NaraSearchPanel({ onAdd }: Props) {
           </div>
 
           <div className="min-w-[180px] flex-1">
-            <label className="mb-1 block text-xs text-gray-500">공고명 키워드</label>
+            <label htmlFor="nara-keyword" className="mb-1 block text-xs text-gray-500">공고명 키워드</label>
             <input
+              id="nara-keyword"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && search()}
               placeholder="예: 열수송관 측량"
-              className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm outline-none focus:border-purple-400"
+              className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm outline-none focus:border-purple-400 focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-1"
             />
           </div>
 
           <div className="min-w-[140px]">
-            <label className="mb-1 block text-xs text-gray-500">발주기관</label>
+            <label htmlFor="nara-instt" className="mb-1 block text-xs text-gray-500">발주기관</label>
             <input
+              id="nara-instt"
               value={instt}
               onChange={(e) => setInstt(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && search()}
               placeholder="예: 한국지역난방공사"
-              className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm outline-none focus:border-purple-400"
+              className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm outline-none focus:border-purple-400 focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-1"
             />
           </div>
 
           <div className="w-28">
-            <label className="mb-1 block text-xs text-gray-500">조회기간</label>
+            <label htmlFor="nara-days" className="mb-1 block text-xs text-gray-500">조회기간</label>
             <select
+              id="nara-days"
               value={days}
               onChange={(e) => setDays(Number(e.target.value))}
-              className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-purple-400"
+              className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-purple-400 focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-1"
             >
               <option value={7}>최근 7일</option>
               <option value={14}>최근 14일</option>
@@ -148,15 +153,11 @@ export default function NaraSearchPanel({ onAdd }: Props) {
             </select>
           </div>
 
-          <button
-            onClick={search}
-            disabled={loading}
-            className="rounded-lg bg-purple-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-purple-400 disabled:cursor-not-allowed disabled:bg-purple-300"
-          >
+          <Button onClick={search} loading={loading} className="rounded-lg px-4 py-1.5 text-sm">
             {loading ? '조회 중…' : '조회'}
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
 
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
@@ -165,7 +166,7 @@ export default function NaraSearchPanel({ onAdd }: Props) {
       )}
 
       {items.length > 0 && (
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        <Card className="overflow-hidden p-0">
           <table className="w-full text-left text-xs">
             <thead className="bg-gray-50 text-gray-500">
               <tr>
@@ -184,19 +185,19 @@ export default function NaraSearchPanel({ onAdd }: Props) {
                   <td className="px-3 py-2 text-gray-600">{(item.bidClseDt ?? '').slice(0, 16)}</td>
                   <td className="px-3 py-2 text-gray-600">{item.cntrctCnclsMthdNm}</td>
                   <td className="px-3 py-2">
-                    <button
+                    <Button
                       onClick={() => handleAdd(item)}
-                      disabled={addingNo === item.bidNtceNo}
-                      className="rounded-md bg-purple-500 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-purple-400 disabled:opacity-50"
+                      loading={addingNo === item.bidNtceNo}
+                      className="rounded-md px-2.5 py-1 text-[11px]"
                     >
                       {addingNo === item.bidNtceNo ? '추가 중…' : '+ 추가'}
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
+        </Card>
       )}
 
       {!loading && !error && items.length === 0 && (

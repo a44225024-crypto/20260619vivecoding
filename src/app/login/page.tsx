@@ -3,6 +3,7 @@
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { login, signup, sendMagicLink } from './actions';
+import Button from '@/components/ui/Button';
 
 type Mode = 'password' | 'magic';
 
@@ -71,65 +72,61 @@ function LoginForm() {
         {mode === 'password' ? (
           <form action={wrap(login)} className="mt-5 space-y-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-gray-600">이메일</label>
+              <label htmlFor="login-email" className="mb-1 block text-xs font-medium text-gray-600">이메일</label>
               <input
+                id="login-email"
                 type="email"
                 name="email"
                 required
                 pattern=".+@seon\.co\.kr"
                 title="@seon.co.kr 이메일만 사용할 수 있습니다"
-                className="w-full rounded-lg border border-purple-200 px-3 py-2 text-sm outline-none focus:border-purple-400"
+                className="w-full rounded-lg border border-purple-200 px-3 py-2 text-sm outline-none focus:border-purple-400 focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-1"
                 placeholder="you@seon.co.kr"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-gray-600">비밀번호</label>
+              <label htmlFor="login-password" className="mb-1 block text-xs font-medium text-gray-600">비밀번호</label>
               <input
+                id="login-password"
                 type="password"
                 name="password"
                 required
                 minLength={6}
-                className="w-full rounded-lg border border-purple-200 px-3 py-2 text-sm outline-none focus:border-purple-400"
+                className="w-full rounded-lg border border-purple-200 px-3 py-2 text-sm outline-none focus:border-purple-400 focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-1"
                 placeholder="********"
               />
             </div>
-            <button
-              type="submit"
-              disabled={pending}
-              className="w-full rounded-lg bg-purple-500 py-2 text-sm font-semibold text-white transition-colors hover:bg-purple-400 disabled:cursor-not-allowed disabled:bg-purple-300"
-            >
+            <Button type="submit" disabled={pending} className="w-full rounded-lg py-2 text-sm">
               로그인
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
+              variant="outline"
               formAction={wrap(signup)}
               disabled={pending}
-              className="w-full rounded-lg border border-purple-200 py-2 text-sm font-semibold text-purple-700 transition-colors hover:bg-purple-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-lg py-2 text-sm"
             >
               회원가입
-            </button>
+            </Button>
           </form>
         ) : (
           <form action={wrap(sendMagicLink)} className="mt-5 space-y-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-gray-600">이메일</label>
+              <label htmlFor="magic-email" className="mb-1 block text-xs font-medium text-gray-600">이메일</label>
               <input
+                id="magic-email"
                 type="email"
                 name="email"
                 required
                 pattern=".+@seon\.co\.kr"
                 title="@seon.co.kr 이메일만 사용할 수 있습니다"
-                className="w-full rounded-lg border border-purple-200 px-3 py-2 text-sm outline-none focus:border-purple-400"
+                className="w-full rounded-lg border border-purple-200 px-3 py-2 text-sm outline-none focus:border-purple-400 focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-1"
                 placeholder="you@seon.co.kr"
               />
             </div>
-            <button
-              type="submit"
-              disabled={pending}
-              className="w-full rounded-lg bg-purple-500 py-2 text-sm font-semibold text-white transition-colors hover:bg-purple-400 disabled:cursor-not-allowed disabled:bg-purple-300"
-            >
+            <Button type="submit" disabled={pending} className="w-full rounded-lg py-2 text-sm">
               로그인 링크 받기
-            </button>
+            </Button>
             <p className="text-[11px] text-gray-400">
               입력한 이메일로 로그인 링크를 보내드려요. 메일함에서 링크를 클릭하면 바로 로그인됩니다.
             </p>

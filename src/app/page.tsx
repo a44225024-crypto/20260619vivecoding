@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import type { BidInfo } from '@/types';
 import { loadBids, upsertBid, deleteBid as dbDeleteBid } from '@/lib/storage';
 import { parsePDF } from '@/lib/pdfExtract';
@@ -9,9 +10,18 @@ import BidCard from '@/components/BidCard';
 import CompareView from '@/components/CompareView';
 import Sidebar from '@/components/Sidebar';
 import KpiCards from '@/components/KpiCards';
-import DashboardCharts from '@/components/DashboardCharts';
 import LogoutButton from '@/components/LogoutButton';
 import NaraSearchPanel from '@/components/NaraSearchPanel';
+
+const DashboardCharts = dynamic(() => import('@/components/DashboardCharts'), {
+  ssr: false,
+  loading: () => (
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="h-56 animate-pulse rounded-xl border border-gray-200 bg-white lg:col-span-2" />
+      <div className="h-56 animate-pulse rounded-xl border border-gray-200 bg-white" />
+    </div>
+  ),
+});
 
 type View = 'dashboard' | 'compare' | 'search';
 
@@ -21,6 +31,7 @@ export default function Home() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     loadBids().then((loaded) => {
@@ -96,28 +107,42 @@ export default function Home() {
       <Sidebar
         bids={bids}
         selectedId={selectedId}
-        onSelect={(id) => { setSelectedId(id); setView('dashboard'); }}
+        onSelect={(id) => { setSelectedId(id); setView('dashboard'); setSidebarOpen(false); }}
         onDelete={deleteBid}
         onUpload={handleFiles}
         loading={loading}
         view={view}
-        onViewChange={setView}
+        onViewChange={(v) => { setView(v); setSidebarOpen(false); }}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
 
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top bar */}
         <header className="shrink-0 border-b border-purple-200 bg-purple-100 px-6 py-3">
           <div className="flex items-center justify-between">
-            <div className="min-w-0">
-              <h2 className="truncate text-sm font-semibold text-gray-900">{headerTitle}</h2>
-              <p className="text-[11px] text-gray-400">
-                {new Date().toLocaleDateString('ko-KR', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  weekday: 'short',
-                })}
-              </p>
+            <div className="flex min-w-0 items-center gap-2">
+              <button
+                type="button"
+                aria-label="메뉴 열기"
+                onClick={() => setSidebarOpen(true)}
+                className="shrink-0 rounded-lg p-1.5 text-gray-600 hover:bg-purple-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 md:hidden"
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              <div className="min-w-0">
+                <h1 className="truncate text-sm font-semibold text-gray-900">{headerTitle}</h1>
+                <p className="text-[11px] text-gray-400">
+                  {new Date().toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'short',
+                  })}
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               {error && (

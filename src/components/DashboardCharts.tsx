@@ -14,19 +14,8 @@ import {
   Legend,
 } from 'recharts';
 import type { BidInfo } from '@/types';
-
-function calcDays(raw: string): number | null {
-  if (!raw) return null;
-  const cleaned = raw
-    .replace(/년/g, '-').replace(/월/g, '-').replace(/일/g, '')
-    .replace(/\.\s*/g, '-').replace(/\s/g, '').replace(/-+$/, '');
-  const d = new Date(cleaned);
-  if (isNaN(d.getTime())) return null;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  d.setHours(0, 0, 0, 0);
-  return Math.floor((d.getTime() - today.getTime()) / 86400000);
-}
+import { daysUntil as calcDays } from '@/lib/dday';
+import Card from '@/components/ui/Card';
 
 const PIE_COLORS = ['#d1d5db', '#fbbf24', '#22c55e'];
 
@@ -73,7 +62,7 @@ export default function DashboardCharts({ bids }: Props) {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       {/* D-Day 현황 (2/3) */}
-      <div className="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      <Card className="lg:col-span-2 p-5">
         <p className="mb-4 text-sm font-semibold text-gray-700">공고별 마감일 현황</p>
         {barData.length === 0 ? (
           <div className="flex h-32 items-center justify-center text-xs text-gray-400">
@@ -136,10 +125,10 @@ export default function DashboardCharts({ bids }: Props) {
             <span className="inline-block h-2 w-4 rounded-sm bg-gray-200" /> 마감
           </span>
         </div>
-      </div>
+      </Card>
 
       {/* 서류 준비 현황 (1/3) */}
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      <Card className="p-5">
         <p className="mb-4 text-sm font-semibold text-gray-700">서류 준비 현황</p>
         {pieData.length === 0 ? (
           <div className="flex h-40 items-center justify-center text-xs text-gray-400">
@@ -170,7 +159,7 @@ export default function DashboardCharts({ bids }: Props) {
             </PieChart>
           </ResponsiveContainer>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

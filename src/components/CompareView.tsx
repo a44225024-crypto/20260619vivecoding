@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import type { BidInfo } from '@/types';
+import { calcDday, daysUntil } from '@/lib/dday';
+import Badge from '@/components/ui/Badge';
 
 const FIELDS: { key: keyof BidInfo; label: string }[] = [
   { key: '공고명', label: '공고명' },
@@ -13,32 +15,19 @@ const FIELDS: { key: keyof BidInfo; label: string }[] = [
 ];
 
 function daysLeft(raw: string): number {
-  if (!raw) return Infinity;
-  const cleaned = raw
-    .replace(/년/g, '-').replace(/월/g, '-').replace(/일/g, '')
-    .replace(/\.\s*/g, '-').replace(/\s/g, '').replace(/-+$/, '');
-  const d = new Date(cleaned);
-  if (isNaN(d.getTime())) return Infinity;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  d.setHours(0, 0, 0, 0);
-  return Math.floor((d.getTime() - today.getTime()) / 86400000);
+  return daysUntil(raw) ?? Infinity;
 }
 
 function DdayBadge({ raw }: { raw: string }) {
-  const diff = daysLeft(raw);
-  if (diff === Infinity) return null;
-  const label = diff < 0 ? '마감' : `D-${diff}`;
-  const cls =
-    diff < 0
-      ? 'bg-gray-100 text-gray-500'
-      : diff <= 7
-      ? 'bg-red-100 text-red-700'
-      : 'bg-blue-100 text-blue-700';
+  const dday = calcDday(raw);
+  if (!dday) return null;
   return (
-    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-bold ${cls}`}>
-      {label}
-    </span>
+    <Badge
+      tone={dday.expired ? 'neutral' : dday.urgent ? 'danger' : 'info'}
+      className="px-2 py-0.5 text-xs font-bold"
+    >
+      {dday.label}
+    </Badge>
   );
 }
 

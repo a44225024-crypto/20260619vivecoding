@@ -87,31 +87,37 @@ export default function ResumeForm({ bidName }: Props) {
                       setProjects((prev) => prev.filter((x) => x.id !== p.id));
                       void dbDeleteProject(p.id);
                     }}
-                    className="text-gray-300 hover:text-red-400 text-sm"
+                    aria-label={`실적 ${idx + 1} 삭제`}
+                    className="text-gray-300 hover:text-red-400 focus-visible:outline-2 focus-visible:outline-red-400 text-sm"
                   >×</button>
                 )}
               </div>
               {(
                 [['용역명', '용역명'], ['발주처', '발주처'], ['계약금액', '계약금액'], ['수행기간', '수행기간'], ['주요내용', '주요 내용']] as [keyof ProjectRecord, string][]
-              ).map(([field, label]) => (
+              ).map(([field, label]) => {
+                const inputId = `proj-${p.id}-${field}`;
+                return (
                 <div key={field} className="flex items-start gap-2">
-                  <label className="w-16 shrink-0 pt-1 text-xs text-gray-500">{label}</label>
+                  <label htmlFor={inputId} className="w-16 shrink-0 pt-1 text-xs text-gray-500">{label}</label>
                   {field === '주요내용' ? (
                     <textarea
+                      id={inputId}
                       value={p[field]}
                       onChange={(e) => updateProj(p.id, field, e.target.value)}
                       rows={2}
-                      className="flex-1 resize-none rounded border border-gray-200 px-2 py-1 text-xs outline-none focus:border-blue-400"
+                      className="flex-1 resize-none rounded border border-gray-200 px-2 py-1 text-xs outline-none focus:border-blue-400 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
                     />
                   ) : (
                     <input
+                      id={inputId}
                       value={p[field]}
                       onChange={(e) => updateProj(p.id, field, e.target.value)}
-                      className="flex-1 rounded border border-gray-200 px-2 py-1 text-xs outline-none focus:border-blue-400"
+                      className="flex-1 rounded border border-gray-200 px-2 py-1 text-xs outline-none focus:border-blue-400 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
                     />
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           ))}
           <button
@@ -139,31 +145,37 @@ export default function ResumeForm({ bidName }: Props) {
                       setCareers((prev) => prev.filter((x) => x.id !== c.id));
                       void dbDeleteCareer(c.id);
                     }}
-                    className="text-gray-300 hover:text-red-400 text-sm"
+                    aria-label={`기술자 ${idx + 1} 삭제`}
+                    className="text-gray-300 hover:text-red-400 focus-visible:outline-2 focus-visible:outline-red-400 text-sm"
                   >×</button>
                 )}
               </div>
               {(
                 [['성명', '성명'], ['직위', '직위'], ['보유자격', '보유자격'], ['주요경력', '주요 경력']] as [keyof CareerRecord, string][]
-              ).map(([field, label]) => (
+              ).map(([field, label]) => {
+                const inputId = `career-${c.id}-${field}`;
+                return (
                 <div key={field} className="flex items-start gap-2">
-                  <label className="w-16 shrink-0 pt-1 text-xs text-gray-500">{label}</label>
+                  <label htmlFor={inputId} className="w-16 shrink-0 pt-1 text-xs text-gray-500">{label}</label>
                   {field === '주요경력' ? (
                     <textarea
+                      id={inputId}
                       value={c[field]}
                       onChange={(e) => updateCareer(c.id, field, e.target.value)}
                       rows={2}
-                      className="flex-1 resize-none rounded border border-gray-200 px-2 py-1 text-xs outline-none focus:border-blue-400"
+                      className="flex-1 resize-none rounded border border-gray-200 px-2 py-1 text-xs outline-none focus:border-blue-400 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
                     />
                   ) : (
                     <input
+                      id={inputId}
                       value={c[field]}
                       onChange={(e) => updateCareer(c.id, field, e.target.value)}
-                      className="flex-1 rounded border border-gray-200 px-2 py-1 text-xs outline-none focus:border-blue-400"
+                      className="flex-1 rounded border border-gray-200 px-2 py-1 text-xs outline-none focus:border-blue-400 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
                     />
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           ))}
           <button

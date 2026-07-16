@@ -2,6 +2,9 @@
 
 import { useMemo, useState } from 'react';
 import type { BidInfo } from '@/types';
+import { calcDday } from '@/lib/dday';
+import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
 import Checklist from './Checklist';
 import ResumeForm from './ResumeForm';
 import AISummaryCard from './AISummaryCard';
@@ -16,21 +19,6 @@ const FIELDS = [
   { key: '마감일' as const, label: '마감일' },
   { key: '참가자격' as const, label: '참가자격' },
 ];
-
-function calcDday(raw: string): { label: string; urgent: boolean; expired: boolean } | null {
-  if (!raw) return null;
-  const cleaned = raw
-    .replace(/년/g, '-').replace(/월/g, '-').replace(/일/g, '')
-    .replace(/\.\s*/g, '-').replace(/\s/g, '').replace(/-+$/, '');
-  const d = new Date(cleaned);
-  if (isNaN(d.getTime())) return null;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  d.setHours(0, 0, 0, 0);
-  const diff = Math.floor((d.getTime() - today.getTime()) / 86400000);
-  if (diff < 0) return { label: '마감', urgent: false, expired: true };
-  return { label: `D-${diff}`, urgent: diff <= 7, expired: false };
-}
 
 interface Props {
   bid: BidInfo;
@@ -123,21 +111,17 @@ export default function BidCard({ bid, onUpdate, onDelete }: Props) {
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {dday && (
-            <span
-              className={`rounded-full px-2 py-1 text-xs font-bold ${
-                dday.expired
-                  ? 'bg-gray-100 text-gray-500'
-                  : dday.urgent
-                  ? 'bg-red-100 text-red-700'
-                  : 'bg-blue-100 text-blue-700'
-              }`}
+            <Badge
+              tone={dday.expired ? 'neutral' : dday.urgent ? 'danger' : 'info'}
+              className="px-2 py-1 text-xs font-bold"
             >
               {dday.label}
-            </span>
+            </Badge>
           )}
           <button
             onClick={() => onDelete(bid.id)}
-            className="text-lg leading-none text-gray-300 hover:text-red-400 transition-colors"
+            aria-label="공고 삭제"
+            className="text-lg leading-none text-gray-300 hover:text-red-400 focus-visible:outline-2 focus-visible:outline-red-400 transition-colors"
             title="삭제"
           >
             ×
@@ -200,7 +184,7 @@ export default function BidCard({ bid, onUpdate, onDelete }: Props) {
                           if (e.key === 'Enter') commitEdit();
                           if (e.key === 'Escape') setEditKey(null);
                         }}
-                        className="flex-1 rounded border border-blue-400 px-2 py-0.5 text-xs outline-none"
+                        className="flex-1 rounded border border-blue-400 px-2 py-0.5 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
                       />
                       <button onClick={commitEdit} className="text-xs font-medium text-blue-600">
                         저장
@@ -228,15 +212,16 @@ export default function BidCard({ bid, onUpdate, onDelete }: Props) {
                   value={ntceNoInput}
                   onChange={(e) => setNtceNoInput(e.target.value)}
                   placeholder="입찰공고번호 (예: R25BK00934017)"
-                  className="flex-1 rounded border border-purple-200 bg-white px-2 py-1 text-xs outline-none focus:border-purple-400"
+                  className="flex-1 rounded border border-purple-200 bg-white px-2 py-1 text-xs outline-none focus:border-purple-400 focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-1"
                 />
-                <button
+                <Button
                   onClick={enrich}
-                  disabled={enriching || !ntceNoInput.trim()}
-                  className="shrink-0 rounded bg-purple-500 px-2.5 py-1 text-xs font-semibold text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  loading={enriching}
+                  disabled={!ntceNoInput.trim()}
+                  className="shrink-0 rounded px-2.5 py-1 text-xs"
                 >
                   {enriching ? '조회 중…' : '보강'}
-                </button>
+                </Button>
               </div>
               {enrichError && <p className="mt-1.5 text-[11px] text-red-600">{enrichError}</p>}
             </div>

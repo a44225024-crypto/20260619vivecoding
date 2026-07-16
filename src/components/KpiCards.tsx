@@ -1,18 +1,11 @@
 'use client';
 
 import type { BidInfo } from '@/types';
+import { daysUntil } from '@/lib/dday';
+import Card from '@/components/ui/Card';
 
 function calcDays(raw: string): number {
-  if (!raw) return Infinity;
-  const cleaned = raw
-    .replace(/년/g, '-').replace(/월/g, '-').replace(/일/g, '')
-    .replace(/\.\s*/g, '-').replace(/\s/g, '').replace(/-+$/, '');
-  const d = new Date(cleaned);
-  if (isNaN(d.getTime())) return Infinity;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  d.setHours(0, 0, 0, 0);
-  return Math.floor((d.getTime() - today.getTime()) / 86400000);
+  return daysUntil(raw) ?? Infinity;
 }
 
 interface KpiCardProps {
@@ -26,16 +19,16 @@ interface KpiCardProps {
 
 function KpiCard({ label, value, sub, accent, iconBg, icon }: KpiCardProps) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <Card className="p-4">
       <div className="flex items-start justify-between">
         <p className="truncate text-xs font-medium text-gray-500">{label}</p>
-        <span className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm ${iconBg}`}>
+        <span aria-hidden="true" className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm ${iconBg}`}>
           {icon}
         </span>
       </div>
       <p className={`mt-3 text-2xl font-bold ${accent}`}>{value}</p>
       <p className="mt-0.5 truncate text-xs text-gray-400">{sub}</p>
-    </div>
+    </Card>
   );
 }
 

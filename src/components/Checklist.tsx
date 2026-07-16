@@ -54,7 +54,7 @@ export default function Checklist({ items, onChange }: Props) {
           <li key={item.id} className="flex items-center gap-2 group">
             <button
               onClick={() => toggle(item.id)}
-              className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium transition-colors ${COLORS[item.status]}`}
+              className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-1 ${COLORS[item.status]}`}
               title="클릭하여 상태 변경"
             >
               {LABELS[item.status]}
@@ -68,7 +68,8 @@ export default function Checklist({ items, onChange }: Props) {
             </span>
             <button
               onClick={() => remove(item.id)}
-              className="text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity text-sm"
+              aria-label="서류 삭제"
+              className="text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity text-sm"
               title="삭제"
             >
               ×
@@ -83,7 +84,7 @@ export default function Checklist({ items, onChange }: Props) {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && add()}
           placeholder="서류 추가…"
-          className="flex-1 rounded border border-gray-200 px-2 py-1.5 text-xs outline-none focus:border-blue-400"
+          className="flex-1 rounded border border-gray-200 px-2 py-1.5 text-xs outline-none focus:border-blue-400 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
         />
         <button
           onClick={add}

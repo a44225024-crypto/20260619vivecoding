@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { BidInfo } from '@/types';
+import Button from '@/components/ui/Button';
 
 interface Result {
   핵심요약: string;
@@ -46,13 +47,9 @@ export default function AISummaryCard({ bid }: Props) {
 
   return (
     <div className="space-y-3">
-      <button
-        onClick={generate}
-        disabled={loading}
-        className="w-full rounded-lg bg-purple-500 py-2 text-sm font-semibold text-white transition-colors hover:bg-purple-400 disabled:cursor-not-allowed disabled:bg-purple-300"
-      >
+      <Button onClick={generate} loading={loading} className="w-full rounded-lg py-2 text-sm">
         {loading ? 'AI 요약 생성 중…' : result ? '다시 요약하기' : 'AI 요약 생성'}
-      </button>
+      </Button>
 
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
